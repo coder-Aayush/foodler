@@ -22,7 +22,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     if (mounted) {
-      context.read<ItemState>().getAllItems(10);
+      context.read<ItemState>().getAllItems();
       context.read<ItemState>().getCategory();
     }
     controller.addListener(() {

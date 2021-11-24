@@ -47,7 +47,7 @@ class ItemState extends ChangeNotifier {
     notifyListeners();
   }
 
-  getAllItems(limit) async {
+  getAllItems() async {
     try {
       // store last documntId in state and fetch for pagination
       setItems = (await itemRef.get())
