@@ -28,7 +28,7 @@ class _HomeState extends State<Home> {
     controller.addListener(() {
       if (controller.offset >= controller.position.maxScrollExtent &&
           !controller.position.outOfRange) {
-        log("at the end of list");
+        context.read<ItemState>().getAllItems();
       }
     });
   }

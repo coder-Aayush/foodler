@@ -12,17 +12,16 @@ class ItemState extends ChangeNotifier {
   final CollectionReference cateGoryRef =
       FirebaseFirestore.instance.collection("category");
 
+  final _foodSnapshot = <DocumentSnapshot>[];
+  List<Item>? get items =>
+      _foodSnapshot.map((e) => Item.fromMap(e.data())).toList();
+
+  int _limit = 5;
+
   List<Item>? _category;
   List<Item>? get categories => _category;
   set setCategories(List<Item> categories) {
     _category = categories;
-    notifyListeners();
-  }
-
-  List<Item>? _items;
-  List<Item>? get items => _items;
-  set setItems(List<Item> items) {
-    _items = items;
     notifyListeners();
   }
 
@@ -49,12 +48,12 @@ class ItemState extends ChangeNotifier {
 
   getAllItems() async {
     try {
-      // store last documntId in state and fetch for pagination
-      setItems = (await itemRef.get())
-          .docs
-          .map((e) => Item.fromMap(e.data()))
-          .toList();
+      final data = await getItems(_limit,
+          startAfter: _foodSnapshot.isNotEmpty ? _foodSnapshot.last : null);
+      _foodSnapshot.addAll(data.docs);
+      notifyListeners();
     } catch (e) {
+      log(e.toString());
       setLoading = false;
       setError = "Couldn't Fetch Items";
     }
@@ -71,7 +70,7 @@ class ItemState extends ChangeNotifier {
         ..image =
             "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1788&q=80"
         ..name = "pizza";
-      await cateGoryRef.doc(id).set(item.toMap());
+      await itemRef.doc(id).set(item.toMap());
       setLoading = false;
     } catch (e) {
       setLoading = false;
@@ -92,6 +91,15 @@ class ItemState extends ChangeNotifier {
       setLoading = true;
       setError = "Error Fetching Categories";
       log(e.toString());
+    }
+  }
+
+  getItems(int limit, {DocumentSnapshot? startAfter}) async {
+    var item = itemRef.orderBy("name").limit(limit);
+    if (startAfter == null) {
+      return (item.get());
+    } else {
+      return (item.startAfterDocument(startAfter).get());
     }
   }
 }
