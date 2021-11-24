@@ -1,7 +1,9 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:foodler/app/helpers/storage.dart';
 
 import 'package:foodler/app/models/item.models.dart';
 
@@ -59,17 +61,15 @@ class ItemState extends ChangeNotifier {
     }
   }
 
-  addItem() async {
+  addItem(Item item, File image) async {
     try {
-      var id = cateGoryRef.doc().id;
+      var id = itemRef.doc().id;
       _loading = true;
       notifyListeners();
-      Item item = Item()
-        ..id = id
-        ..categoryName = "pizza"
-        ..image =
-            "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1788&q=80"
-        ..name = "pizza";
+      if (item.image != null) {
+        var url = await StorageHelper().uploadFile(image);
+        item.image = url;
+      }
       await itemRef.doc(id).set(item.toMap());
       setLoading = false;
     } catch (e) {
