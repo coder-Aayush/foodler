@@ -14,7 +14,7 @@ class ItemState extends ChangeNotifier {
   final CollectionReference cateGoryRef =
       FirebaseFirestore.instance.collection("category");
 
-  final _foodSnapshot = <DocumentSnapshot>[];
+  var _foodSnapshot = <DocumentSnapshot>[];
   List<Item>? get items =>
       _foodSnapshot.map((e) => Item.fromMap(e.data())).toList();
 
@@ -57,10 +57,12 @@ class ItemState extends ChangeNotifier {
 
   getAllItems() async {
     try {
-      final data = await getItems(_limit,
-          startAfter: _foodSnapshot.isNotEmpty ? _foodSnapshot.last : null);
-      _foodSnapshot.addAll(data.docs);
-      notifyListeners();
+      getItems(_limit,
+              startAfter: _foodSnapshot.isNotEmpty ? _foodSnapshot.last : null)
+          .listen((e) {
+        _foodSnapshot.addAll(e.docs);
+        notifyListeners();
+      });
     } catch (e) {
       log(e.toString());
       setLoading = false;
@@ -77,6 +79,7 @@ class ItemState extends ChangeNotifier {
         var url = await StorageHelper().uploadFile(File(_itemData.image!));
         item..image = url;
       }
+      _foodSnapshot = [..._foodSnapshot];
       await itemRef.doc(id).set(item.toMap());
       setLoading = false;
     } catch (e) {
@@ -101,12 +104,12 @@ class ItemState extends ChangeNotifier {
     }
   }
 
-  getItems(int limit, {DocumentSnapshot? startAfter}) async {
+  getItems(int limit, {DocumentSnapshot? startAfter}) {
     var item = itemRef.orderBy("name").limit(limit);
     if (startAfter == null) {
-      return (item.get());
+      return (item.snapshots());
     } else {
-      return (item.startAfterDocument(startAfter).get());
+      return (item.startAfterDocument(startAfter).snapshots());
     }
   }
 }
