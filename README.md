@@ -1,7 +1,7 @@
 # Foodler
 
 ### DEMO APP
-
+check `app/` folder
 
 ## Running Project
 
