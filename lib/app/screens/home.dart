@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'dart:ui';
 import 'package:foodler/app/models/item.models.dart';
+import 'package:foodler/app/screens/create_item.dart';
+import 'package:foodler/app/widgets/bottom_sheet_wrapper.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:foodler/app/providers/item.provider.dart';
@@ -36,6 +38,11 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showWepostBottomSheet(context, CreateItem());
+        },
+      ),
       body: SafeArea(
         child: Container(
           decoration: BoxDecoration(
@@ -44,29 +51,34 @@ class _HomeState extends State<Home> {
           )),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: CustomScrollView(
-              controller: controller,
-              slivers: [
-                Space(height: 10),
-                SliverToBoxAdapter(
-                  child: Text(
-                    "Welcome,",
-                    style: Theme.of(context).textTheme.headline6,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await context.read<ItemState>().getAllItems();
+              },
+              child: CustomScrollView(
+                controller: controller,
+                slivers: [
+                  Space(height: 10),
+                  SliverToBoxAdapter(
+                    child: Text(
+                      "Welcome,",
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
                   ),
-                ),
-                Space(height: 10),
-                SliverToBoxAdapter(
-                  child: Text(
-                    "Scroll and choose a category to explore the menu",
-                    style: Theme.of(context).textTheme.caption,
+                  Space(height: 10),
+                  SliverToBoxAdapter(
+                    child: Text(
+                      "Scroll and choose a category to explore the menu",
+                      style: Theme.of(context).textTheme.caption,
+                    ),
                   ),
-                ),
-                Space(height: 10),
-                buildCategories(),
-                Space(height: 30),
-                buildItems(),
-                Space(height: 10),
-              ],
+                  Space(height: 10),
+                  buildCategories(),
+                  Space(height: 30),
+                  buildItems(),
+                  Space(height: 10),
+                ],
+              ),
             ),
           ),
         ),

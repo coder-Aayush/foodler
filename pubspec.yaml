@@ -27,6 +27,7 @@ dependencies:
   firebase_storage: ^10.1.0
   flutter:
     sdk: flutter
+  image_picker: null
   provider: ^6.0.1
 
 dev_dependencies:

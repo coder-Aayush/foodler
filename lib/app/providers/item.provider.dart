@@ -48,6 +48,13 @@ class ItemState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Item _itemData = Item();
+  Item get itemData => _itemData;
+  set setItemData(Item item) {
+    _itemData = item;
+    notifyListeners();
+  }
+
   getAllItems() async {
     try {
       final data = await getItems(_limit,
@@ -61,20 +68,20 @@ class ItemState extends ChangeNotifier {
     }
   }
 
-  addItem(Item item, File image) async {
+  addItem(Item item) async {
     try {
       var id = itemRef.doc().id;
       _loading = true;
       notifyListeners();
-      if (item.image != null) {
-        var url = await StorageHelper().uploadFile(image);
-        item.image = url;
+      if (_itemData.image != null) {
+        var url = await StorageHelper().uploadFile(File(_itemData.image!));
+        item..image = url;
       }
       await itemRef.doc(id).set(item.toMap());
       setLoading = false;
     } catch (e) {
+      setError = e.toString();
       setLoading = false;
-      setError = "Error Fetching Image";
       log(e.toString());
     }
   }
